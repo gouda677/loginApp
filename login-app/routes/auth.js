@@ -34,6 +34,12 @@ localizeData.append(6);
 localizeData.push(7);
 localizeData.map(item => item.name);    
 //new 12347298 to branch 1
+
+///addd linie 1
+localizeData.forEach(item => {
+    console.log(item);
+}   );
+
 app.post('/localize',(req,res)=>{
     console.log(req.body);
   //res.send does not send json data, it sends a string response. If you want to send json data, use res.json() instead.
