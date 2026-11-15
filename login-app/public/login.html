@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign in — Login App</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div class="page">
+    <div class="card">
+
+      <div class="logo">
+        <div class="logo-mark">L</div>
+        <span class="logo-name">LoginApp</span>
+      </div>
+
+      <h1>Welcome back</h1>
+      <p class="subtitle">Sign in to your account to continue.</p>
+
+      <div id="alert" class="alert" role="alert"></div>
+
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email" />
+        <p class="field-error" id="email-error"></p>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" placeholder="••••••••" autocomplete="current-password" />
+        <p class="field-error" id="password-error"></p>
+      </div>
+
+      <button class="btn" id="submit-btn" type="button">Sign in</button>
+
+      <p class="form-footer">
+        No account? <a href="/register.html">Create one</a>
+      </p>
+
+    </div>
+  </div>
+
+  <script src="/js/auth.js"></script>
+  <script>
+    const emailInput    = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const submitBtn     = document.getElementById('submit-btn');
+    const alert         = document.getElementById('alert');
+
+    function showAlert(msg, type) {
+      alert.textContent = msg;
+      alert.className   = `alert visible ${type}`;
+    }
+
+    function clearFieldError(id) {
+      document.getElementById(id).classList.remove('visible');
+      document.getElementById(id.replace('-error', '')).classList.remove('invalid');
+    }
+
+    function showFieldError(id, msg) {
+      const el = document.getElementById(id);
+      el.textContent = msg;
+      el.classList.add('visible');
+      document.getElementById(id.replace('-error', '')).classList.add('invalid');
+    }
+
+    function validate() {
+      let ok = true;
+      clearFieldError('email-error');
+      clearFieldError('password-error');
+
+      if (!emailInput.value.trim()) {
+        showFieldError('email-error', 'Email is required.');
+        ok = false;
+      }
+      if (!passwordInput.value) {
+        showFieldError('password-error', 'Password is required.');
+        ok = false;
+      }
+      return ok;
+    }
+
+    submitBtn.addEventListener('click', async () => {
+      if (!validate()) return;
+
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span class="spinner"></span>Signing in…';
+      alert.className = 'alert';
+
+      const result = await apiPost('/api/auth/login', {
+        email: emailInput.value.trim(),
+        password: passwordInput.value,
+      });
+
+      if (result.success) {
+        showAlert('Login successful — redirecting…', 'success');
+        setTimeout(() => window.location.href = '/dashboard.html', 600);
+      } else {
+        showAlert(result.message || 'Login failed.', 'error');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Sign in';
+      }
+    });
+
+    // Allow pressing Enter to submit
+    [emailInput, passwordInput].forEach(el =>
+      el.addEventListener('keydown', e => { if (e.key === 'Enter') submitBtn.click(); })
+    );
+  </script>
+</body>
+</html>

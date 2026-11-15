@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create account — Login App</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div class="page">
+    <div class="card">
+
+      <div class="logo">
+        <div class="logo-mark">L</div>
+        <span class="logo-name">LoginApp</span>
+      </div>
+
+      <h1>Create an account</h1>
+      <p class="subtitle">Join in seconds. No credit card needed.</p>
+
+      <div id="alert" class="alert" role="alert"></div>
+
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" placeholder="johndoe" autocomplete="username" />
+        <p class="field-error" id="username-error"></p>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email" />
+        <p class="field-error" id="email-error"></p>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" placeholder="At least 6 characters" autocomplete="new-password" />
+        <p class="field-error" id="password-error"></p>
+      </div>
+
+      <div class="form-group">
+        <label for="confirm">Confirm password</label>
+        <input type="password" id="confirm" name="confirm" placeholder="Repeat your password" autocomplete="new-password" />
+        <p class="field-error" id="confirm-error"></p>
+      </div>
+
+      <button class="btn" id="submit-btn" type="button">Create account</button>
+
+      <p class="form-footer">
+        Already have an account? <a href="/login.html">Sign in</a>
+      </p>
+
+    </div>
+  </div>
+
+  <script src="/js/auth.js"></script>
+  <script>
+    const usernameInput = document.getElementById('username');
+    const emailInput    = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const confirmInput  = document.getElementById('confirm');
+    const submitBtn     = document.getElementById('submit-btn');
+    const alertEl       = document.getElementById('alert');
+
+    function showAlert(msg, type) {
+      alertEl.textContent = msg;
+      alertEl.className   = `alert visible ${type}`;
+    }
+
+    function clearErr(id) {
+      document.getElementById(id + '-error').classList.remove('visible');
+      document.getElementById(id).classList.remove('invalid');
+    }
+
+    function showErr(id, msg) {
+      const el = document.getElementById(id + '-error');
+      el.textContent = msg;
+      el.classList.add('visible');
+      document.getElementById(id).classList.add('invalid');
+    }
+
+    function validate() {
+      ['username', 'email', 'password', 'confirm'].forEach(clearErr);
+      let ok = true;
+
+      const username = usernameInput.value.trim();
+      const email    = emailInput.value.trim();
+      const password = passwordInput.value;
+      const confirm  = confirmInput.value;
+
+      if (!username) {
+        showErr('username', 'Username is required.'); ok = false;
+      } else if (username.length < 2) {
+        showErr('username', 'Username must be at least 2 characters.'); ok = false;
+      }
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!email) {
+        showErr('email', 'Email is required.'); ok = false;
+      } else if (!emailRegex.test(email)) {
+        showErr('email', 'Enter a valid email address.'); ok = false;
+      }
+
+      if (!password) {
+        showErr('password', 'Password is required.'); ok = false;
+      } else if (password.length < 6) {
+        showErr('password', 'Password must be at least 6 characters.'); ok = false;
+      }
+
+      if (!confirm) {
+        showErr('confirm', 'Please confirm your password.'); ok = false;
+      } else if (password && confirm !== password) {
+        showErr('confirm', 'Passwords do not match.'); ok = false;
+      }
+
+      return ok;
+    }
+
+    submitBtn.addEventListener('click', async () => {
+      if (!validate()) return;
+
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span class="spinner"></span>Creating account…';
+      alertEl.className = 'alert';
+
+      const result = await apiPost('/api/auth/register', {
+        username: usernameInput.value.trim(),
+        email:    emailInput.value.trim(),
+        password: passwordInput.value,
+      });
+
+      if (result.success) {
+        showAlert('Account created! Redirecting to login…', 'success');
+        setTimeout(() => window.location.href = '/login.html', 1200);
+      } else {
+        showAlert(result.message || 'Registration failed.', 'error');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Create account';
+      }
+    });
+
+    // Enter key support
+    [usernameInput, emailInput, passwordInput, confirmInput].forEach(el =>
+      el.addEventListener('keydown', e => { if (e.key === 'Enter') submitBtn.click(); })
+    );
+  </script>
+</body>
+</html>
