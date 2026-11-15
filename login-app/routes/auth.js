@@ -29,7 +29,11 @@ app.post('testpointer',(req,res)=> {
     console.log(req.body);
     res.json({ message: 'Test pointer received' });
 });
-
+let localizeData = [1,2,3,4,5];
+localizeData.append(6);
+localizeData.push(7);
+localizeData.map(item => item.name);    
+//new 12347298 to branch 1
 app.post('/localize',(req,res)=>{
     console.log(req.body);
   //res.send does not send json data, it sends a string response. If you want to send json data, use res.json() instead.
