@@ -25,7 +25,10 @@ function myFunction(args){
     return args;
 }
     
-
+app.post('testpointer',(req,res)=> {
+    console.log(req.body);
+    res.json({ message: 'Test pointer received' });
+});
 
 app.post('/localize',(req,res)=>{
     console.log(req.body);
